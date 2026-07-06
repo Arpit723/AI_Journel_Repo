@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Xcode — user-specific state (never commit)
+xcuserdata/
+*.xcuserstate
+
+# Xcode — build output
+build/
+DerivedData/
+
+# Xcode — archive / packaging artifacts
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager — local working state
+.build/
+.swiftpm/
