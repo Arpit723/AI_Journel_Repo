@@ -117,5 +117,5 @@ func generateSuggestions(
     return try await session.respond(
         to: "Summarize this journal entry in one sentence and suggest 2-4 topic tags: \(entryText)",
         generating: EntryAISuggestions.self
-    )
+    ).content
 }
