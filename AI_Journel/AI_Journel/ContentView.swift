@@ -120,7 +120,12 @@ struct AddEntryView: View {
         modelContext.insert(entry)
         dismiss()
 
-        guard checker.tier.isUsable else { return }
+        print("[Journal] saved entry: \(bodyText)")
+
+        guard checker.tier.isUsable else {
+            print("[Journal] AI skipped — tier: \(checker.tier)")
+            return
+        }
 
         let text = bodyText
         Task { @MainActor in
@@ -130,9 +135,10 @@ struct AddEntryView: View {
                     checker: checker,
                     useEnhancedProcessing: false
                 )
+                print("[Journal] AI tags: \(suggestions.suggestedTags)")
                 entry.tags = suggestions.suggestedTags
             } catch {
-                // Entry stays saved; tags remain empty.
+                print("[Journal] AI tag generation failed: \(error)")
             }
         }
     }
