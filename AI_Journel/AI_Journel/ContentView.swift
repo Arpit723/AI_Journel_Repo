@@ -12,6 +12,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \JournalEntry.timestamp, order: .reverse) private var entries: [JournalEntry]
     @State private var showingAddSheet = false
+    @State private var showingSearchDebug = false
     @State private var checker = AIEligibilityChecker()
 
     var body: some View {
@@ -50,9 +51,23 @@ struct ContentView: View {
                         Label("Add Entry", systemImage: "plus")
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            showingSearchDebug = true
+                        } label: {
+                            Label("Semantic Search Test…", systemImage: "magnifyingglass")
+                        }
+                    } label: {
+                        Label("Debug", systemImage: "ellipsis.circle")
+                    }
+                }
             }
             .sheet(isPresented: $showingAddSheet) {
                 AddEntryView(checker: checker)
+            }
+            .sheet(isPresented: $showingSearchDebug) {
+                DebugSearchView()
             }
             .task {
                 checker.refresh()
