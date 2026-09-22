@@ -33,7 +33,7 @@ struct ContentView: View {
                     List {
                         ForEach(entries) { entry in
                             NavigationLink {
-                                EntryDetailView(entry: entry)
+                                EntryDetailView(entry: entry, checker: checker)
                             } label: {
                                 EntryRowView(entry: entry)
                             }
@@ -64,7 +64,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
-                AddEntryView(checker: checker)
+                EntryEditorView(checker: checker)
             }
             .sheet(isPresented: $showingSearchDebug) {
                 DebugSearchView()
