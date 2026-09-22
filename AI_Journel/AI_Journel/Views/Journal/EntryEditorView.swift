@@ -86,6 +86,15 @@ struct EntryEditorView: View {
     }
 
     private func updateEntry(_ entry: JournalEntry) {
+        // Skip everything if the text didn't actually change — tags are
+        // already in sync with the stored body, so regeneration would be
+        // wasted model work. Compared BEFORE mutating entry.body.
+        guard entry.body.trimmed != bodyText.trimmed else {
+            print("[Journal] edit saved with unchanged text — skipping tag regeneration")
+            dismiss()
+            return
+        }
+
         // Mutate the existing model — it's already registered in the context,
         // so no insert; SwiftData persists the change. Original timestamp is
         // kept so edits don't reorder the journal.
