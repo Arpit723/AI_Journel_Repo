@@ -18,3 +18,6 @@ DerivedData/
 # Swift Package Manager — local working state
 .build/
 .swiftpm/
+
+# Kilo Code — local agent rules/state
+.kilocode/

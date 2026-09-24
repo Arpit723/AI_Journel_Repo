@@ -16,6 +16,10 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Ask", systemImage: "sparkles")
                 }
+            TagFrequencyView()
+                .tabItem {
+                    Label("Patterns", systemImage: "tag")
+                }
         }
     }
 }

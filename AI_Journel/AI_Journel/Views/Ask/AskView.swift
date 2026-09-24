@@ -58,7 +58,7 @@ struct AskView: View {
                 if noRelevantMatches {
                     Section {
                         Label(
-                            "I couldn't find journal entries relevant to this question, so I won't guess an answer.",
+                            "I don't have enough journal entries to answer that.",
                             systemImage: "magnifyingglass"
                         )
                         .foregroundStyle(.secondary)
@@ -124,17 +124,27 @@ struct AskView: View {
         errorMessage = nil
         isLoading = true
 
+        print("[Ask] question: \"\(text)\" — searching \(entries.count) entr\(entries.count == 1 ? "y" : "ies")")
+
         Task { @MainActor in
             let relevant = RAGService.relevantMatches(for: text, from: entries)
 
+            print("[Ask] retrieval: \(relevant.count) match(es) at or above threshold \(String(format: "%.2f", RAGService.relevanceThreshold))")
+            for (index, match) in relevant.enumerated() {
+                print("[Ask]   #\(index + 1) score=\(String(format: "%.4f", match.score))  \(match.entry.timestamp.formatted(date: .abbreviated, time: .shortened))")
+            }
+
             guard !relevant.isEmpty else {
+                print("[Ask] no relevant matches — refusing to answer")
                 isLoading = false
                 noRelevantMatches = true
                 return
             }
 
             do {
-                answer = try await RAGService.generateAnswer(for: text, matches: relevant)
+                let generated = try await RAGService.generateAnswer(for: text, matches: relevant)
+                print("[Ask] answer: \"\(generated)\"")
+                answer = generated
                 sources = relevant.map { match in
                     SourceSnippet(
                         date: match.entry.timestamp,
@@ -142,7 +152,9 @@ struct AskView: View {
                         score: match.score
                     )
                 }
+                print("[Ask] showing \(sources.count) source(s) in the UI")
             } catch {
+                print("[Ask] answer generation failed: \(error)")
                 errorMessage = "Couldn't generate an answer. Please try again."
             }
             isLoading = false

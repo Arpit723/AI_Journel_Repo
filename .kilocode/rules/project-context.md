@@ -15,13 +15,13 @@ and a grounded Ask/Q&A screen.
 - **On-device only** — no network calls, no external LLM APIs, no server components.
 - **Plain-text entries only** — no photos, no voice-to-text, no rich text.
 - **No CloudKit sync, no authentication, no multi-user support.**
-- **Pattern surfacing: NOT BUILT.** When added, it must be simple tag-frequency
-  counting only — no trend analysis, no sentiment analysis.
+- **Pattern surfacing: tag-frequency counting only** (`Views/Patterns/TagFrequencyView.swift`,
+  read-only list sorted by count). Never add trend analysis or sentiment analysis.
 - No undo/version history for entries — simple overwrite-on-save.
 - Ask screen: single question in, single grounded answer out — no chat history,
   no streaming responses.
 
-## Architecture (verified 2026-09-22)
+## Architecture (verified 2026-09-23)
 
 ```
 AI_Journel/AI_Journel/
@@ -39,7 +39,8 @@ AI_Journel/AI_Journel/
 │   └── RAGService.swift         # relevantMatches (k=5, relevanceThreshold = 0.30), generateAnswer,
 │                                #   buildPrompt (grounded Q&A prompt)
 └── Views/
-    ├── MainTabView.swift        # TabView: "Journal" tab (ContentView) + "Ask" tab (AskView)
+    ├── MainTabView.swift        # TabView: "Journal" (ContentView) + "Ask" (AskView)
+    │                            #   + "Patterns" (TagFrequencyView) tabs
     ├── DebugSearchView.swift    # TEMPORARY console debug harness for SemanticSearch
     │                            #   (Journal toolbar → Debug menu)
     ├── Journal/
@@ -52,6 +53,9 @@ AI_Journel/AI_Journel/
     ├── Ask/
     │   └── AskView.swift          # grounded Q&A UI: question field, loading, answer,
     │                              #   Sources (date + excerpt + score), AI-unavailable message
+    ├── Patterns/
+    │   └── TagFrequencyView.swift # read-only tag-frequency list (counts per tag across
+    │                              #   entries, sorted highest-first; empty states)
     └── Components/
         └── TagFlowLayout.swift    # TagFlowLayout (Layout), TagPillData, TagPill, TagPillRow
                                    #   (max 3 visible + "+N" overflow)
@@ -98,7 +102,7 @@ moving, or renaming source files requires **no** .xcodeproj edits).
 ### Misc
 - Tag pills: `TagPillRow(tags: entry.tags.map { TagPillData(label: $0, isAISourced: true) })`
   — AI-sourced styling is correct for all current tags.
-- Console logs use `[Journal] …` / `[SemanticSearch] …` prefixes.
+- Console logs use `[Journal] …` / `[SemanticSearch] …` / `[Ask] …` prefixes.
 - Xcode previews use `.modelContainer(for: JournalEntry.self, inMemory: true)`.
 
 ## Known inconsistencies / drift (flagged, not fixed)
@@ -109,9 +113,7 @@ moving, or renaming source files requires **no** .xcodeproj edits).
    in `JournalListView.swift` and referenced by `MainTabView`; the `SemanticSearch`
    enum lives in `EmbeddingService.swift`; `DebugSearchView` sits directly under
    `Views/` (not in a subfolder).
-3. **No `Views/Patterns/` folder exists** — pattern surfacing is future work
-   (tag-frequency only when built).
-4. **README.md at the repo root is stale**: documents the pre-reorganization flat
+3. **README.md at the repo root is stale**: documents the pre-reorganization flat
    layout, `AddEntryView`, and `ContentView.swift` paths that no longer exist.
-5. `DebugSearchView` is a temporary harness wired into the Journal toolbar Debug
+4. `DebugSearchView` is a temporary harness wired into the Journal toolbar Debug
    menu — remove before any release build.
